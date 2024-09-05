@@ -21,16 +21,35 @@ export default function TodoList({status, todos}: TodoListProps) {
   const {client} = useAnalytics();
 
   const renderTodos = () => {
-    const checkboxes:ReactNode[] =  [];
-    const buttonGroup: ReactNode[] = [];
+    const checkboxMap =  new Map<number, ReactNode>();
 
     todos.forEach((todo: TodoListType, index: number) => {
       if (todo.status === status) {
-        checkboxes.push(
-          <CircleCheckBox name={todo.name} priority={todo.priority} position={index} status={todo.status} />
-        );
+        checkboxMap.set(index, (
+          <CircleCheckBox name={todo.name}
+                          priority={todo.priority}
+                          position={index}
+                          status={todo.status}
+          />));
+      }
+    });
 
-        buttonGroup.push(
+
+   return checkboxMap;
+  }
+
+  const renderTodoRow = () => {
+    const checkboxes: Map<number, ReactNode> = renderTodos();
+    const todoRow = [];
+    for (const [index, todo] of checkboxes) {
+      todoRow.push(
+        <Box display="flex" key={`todo${index}`} justifyContent="space-between"
+             sx={{paddingX: 1, borderWidth: '2px', borderBottomStyle: 'solid',
+               borderColor: grey[500]}}
+        >
+          <Box>{todo}</Box>
+
+          {/* also render the button group that goes with the checkbox */}
           <ButtonGroup variant="text" aria-label="Basic button group">
             <Button onClick={() => {
               client('todo_edit', todos[index]['name'], todos[index]['priority']);
@@ -41,32 +60,12 @@ export default function TodoList({status, todos}: TodoListProps) {
               deleteTodo(index);
             }}><DeleteIcon /></Button>
           </ButtonGroup>
-        )
-      }
-    });
+        </Box>
 
-    if (!checkboxes.length) {
-      return {checkboxes: [], buttonGroup: []};
+      )
     }
 
-
-   return {checkboxes, buttonGroup};
-  }
-
-  const renderTodoRow = () => {
-    const {checkboxes, buttonGroup} = renderTodos();
-
-    return checkboxes.map((row, index) => {
-      return (
-        <Box display="flex" key={`todo${index}`} justifyContent="space-between"
-             sx={{paddingX: 1, borderWidth: '2px', borderBottomStyle: 'solid', borderColor: grey[500]}}>
-          <Box>{row}</Box>
-
-          {/* also render the button group that goes with the checkbox  */}
-          {buttonGroup[index]}
-        </Box>
-      )
-    });
+    return todoRow;
   };
 
   return (

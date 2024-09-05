@@ -11,6 +11,7 @@ export type TodoStoreActions = {
   addTodo: (todo: TodoListType) => void;
   toggleTodo: (index: number) => void;
   updateTodo: (name: string, priority:number, index:number) => void;
+  deleteTodo: (index:number) => void;
 };
 
 export const useTodoStore = create<TodoStoreState & TodoStoreActions>()(
@@ -34,6 +35,18 @@ export const useTodoStore = create<TodoStoreState & TodoStoreActions>()(
       ns[index]['name'] = name;
       ns[index]['priority'] = priority;
       return({ todos: ns });
+    }),
+    deleteTodo: (index: number) => set((state) => {
+      const ns = JSON.parse(JSON.stringify(state.todos));
+      const res = ns.filter((_: TodoListType, i:number) => {
+        if (i !== index) {
+          return true;
+        }
+
+        return false
+      });
+
+      return({todos: res});
     })
   })
 )
